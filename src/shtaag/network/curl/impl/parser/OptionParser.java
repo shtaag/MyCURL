@@ -21,6 +21,7 @@ public class OptionParser {
 		for (int i = 0; i < str.length; i++) {
 			Option option = null;
 			if ((option = Option.check(str[i])) != null) {
+				// TODO オプションが値を持っているとは限らない
 				if (Option.check(str[i+1]) != null) {
 					System.out.println("no Value for: " + str[i]);
 				}

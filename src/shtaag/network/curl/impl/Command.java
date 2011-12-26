@@ -59,6 +59,10 @@ public class Command implements Serializable {
 	 * @return the command
 	 */
 	public String getCommand() {
+		// TODO -Fの時とかPOSTをどう使うのか
+		if (command == null) {
+			return "GET";
+		}
 		return command;
 	}
 

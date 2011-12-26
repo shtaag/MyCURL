@@ -61,7 +61,7 @@ public class CommandFactory {
 		Queue<UrlFileHandling> result = new ArrayDeque<UrlFileHandling>();
 		for (int i = 0; i < urlList.size(); i++) {
 			if (files.isEmpty()) {
-				result.add(new UrlFileHandling(urlList.get(i), new UrlFileHandling.StdOut(null)));
+				result.add(new UrlFileHandling(urlList.get(i), new UrlFileHandling.StdOut("stdout")));
 			} else {
 				result.add(new UrlFileHandling(urlList.get(i), files.get(i)));
 			}
