@@ -3,6 +3,7 @@
  */
 package shtaag.network.curl.framework;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -11,6 +12,6 @@ import java.io.IOException;
  */
 public interface OutputWriter {
 	
-	public void write(String str) throws IOException;
+	public void write(String str, File file) throws IOException;
 
 }
