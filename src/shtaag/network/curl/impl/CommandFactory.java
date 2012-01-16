@@ -4,7 +4,6 @@
 package shtaag.network.curl.impl;
 
 import java.io.File;
-import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,15 +25,36 @@ import shtaag.network.curl.impl.output.StandardOutWriter;
 public class CommandFactory {
 
 	public Command getCommand(List<OptionEntity> optionList, List<URL> urlList) {
-
+		
+		// -H
 		Map<String, String> headers = getHeaders(optionList);
-		String command = command(optionList);
+		// -X
+		String command = selectCommand(optionList);
+		// -o
 		List<File> files = getFileList(optionList);
 		Queue<UrlFileHandling> urlFilehandling = combineUrlFile(urlList, files);
 		OutputWriter writer = getWriter(files);
+		// -v
 		boolean isVerbose = isVerbose(optionList);
+		// -L
+		boolean isRedirect = isRedirect(optionList);
+		// -x
 		boolean proxy = proxy(optionList);
 		return new Command(headers, command, urlFilehandling, writer, isVerbose, proxy);
+	}
+
+
+	/**
+	 * @param optionList
+	 * @return
+	 */
+	private boolean isRedirect(List<OptionEntity> optionList) {
+		for (OptionEntity option : optionList) {
+			if (option.getType().equals(Option.LOCATION)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 
@@ -77,8 +97,8 @@ public class CommandFactory {
 	private boolean proxy(List<OptionEntity> optionList) {
 		// TODO 複数対応
 		for (OptionEntity option : optionList) {
-			if (option.type.equals(Option.PROXYHOST)) {
-				return Boolean.valueOf(option.value);
+			if (option.getType().equals(Option.PROXYHOST)) {
+				return Boolean.valueOf(option.getValue());
 			}
 		}
 		return false;
@@ -89,10 +109,9 @@ public class CommandFactory {
 	 * @return
 	 */
 	private boolean isVerbose(List<OptionEntity> optionList) {
-		// TODO 複数対応˙
 		for (OptionEntity option : optionList) {
-			if (option.type.equals(Option.VERBOSE)) {
-				return Boolean.valueOf(option.value);
+			if (option.getType().equals(Option.VERBOSE)) {
+				return true;
 			}
 		}
 		return false;
@@ -101,8 +120,8 @@ public class CommandFactory {
 	private Map<String, String> getHeaders(List<OptionEntity> optionList) {
 		Map<String, String> result = new HashMap<String, String>();
 		for (OptionEntity option : optionList) {
-			if (option.type.equals(Option.HEADER)) {
-				String[] keyValuePair = parseHeader(option.value);
+			if (option.getType().equals(Option.HEADER)) {
+				String[] keyValuePair = parseHeader(option.getValue());
 				result.put(keyValuePair[0], keyValuePair[1]);
 			}
 		}
@@ -116,12 +135,12 @@ public class CommandFactory {
 		return result;
 	}
 	
-	private String command(List<OptionEntity> optionList) {
+	private String selectCommand(List<OptionEntity> optionList) {
 		// TODO 二つ以上来るとあと勝ちになってる
 		String command = null;
 		for (OptionEntity option : optionList) {
-			if (option.type.equals(Option.COMMAND)) {
-				command = option.value;
+			if (option.getType().equals(Option.COMMAND)) {
+				command = option.getValue();
 			}
 		}
 		return command;
@@ -130,8 +149,8 @@ public class CommandFactory {
 	private List<File> getFileList(List<OptionEntity> optionList) {
 		List<File> result = new ArrayList<File>();
 		for (OptionEntity option : optionList) {
-			if (option.type.equals(Option.FILE)) {
-				result.add(new File(option.value));
+			if (option.getType().equals(Option.FILE)) {
+				result.add(new File(option.getValue()));
 			}
 		}
 		if (result.isEmpty()) {

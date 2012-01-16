@@ -4,20 +4,17 @@
 package shtaag.network.curl;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 import java.util.Queue;
 
-import shtaag.network.curl.framework.RequestSender;
 import shtaag.network.curl.impl.Command;
 import shtaag.network.curl.impl.CommandFactory;
-import shtaag.network.curl.impl.ResponseEntity;
+import shtaag.network.curl.impl.URL;
 import shtaag.network.curl.impl.UrlFileHandling;
 import shtaag.network.curl.impl.option.OptionEntity;
 import shtaag.network.curl.impl.parser.OptionParser;
 import shtaag.network.curl.impl.parser.UrlParser;
-import shtaag.network.curl.impl.request.HttpRequestSender;
+import shtaag.network.curl.impl.request.MySocket;
 
 /**
  * @author takei_s
@@ -57,16 +54,15 @@ public class MyCURLMain {
 			
 			Queue<UrlFileHandling> urlQueue = command.getUrlFilehandling();
 			// TODO 本当はurlとsender(protocol)をひとまとめにしなければならなかった。
-			RequestSender sender = new HttpRequestSender();
+//			RequestSender sender = new HttpRequestSender();
 			while (! urlQueue.isEmpty()) {
 				UrlFileHandling urlFileHandling = urlQueue.poll();
-				ResponseEntity result = sender.request(command, urlFileHandling);
-				command.getWriter().write(result.result, result.file);
+				MySocket socket = new MySocket(urlFileHandling.url.host, 80);
+				socket.doHttpClient(command, urlFileHandling.url.path);
+//				ResponseEntity result = sender.request(command, urlFileHandling);
+//				command.getWriter().write(result.result, result.file);
 			}
 			
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-			throw new RuntimeException(e);
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);

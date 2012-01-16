@@ -4,7 +4,6 @@
 package shtaag.network.curl.impl;
 
 import java.io.File;
-import java.net.URL;
 
 /**
  * @author takei_s
