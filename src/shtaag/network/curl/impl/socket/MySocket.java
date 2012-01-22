@@ -54,11 +54,12 @@ public class MySocket {
 		}
 	}
 	
-	private static final String VERVOSE_REQ = "> ";
-	private static final String VERVOSE_RES = "< ";
+	private static final String VERBOSE_REQ = "> ";
+	private static final String VERBOSE_RES = "< ";
 	public ByteBuffer doHttpClient(Command command, String path) throws IOException {
 		state = state.SEND_REQ;
 		ByteBuffer reqBytes = null;
+		// TODO for exercise, here use selector and socketChannel
 		loop:
 			while(true) {
 				switch(state) {
@@ -76,28 +77,35 @@ public class MySocket {
 							state = State.RECV_RES;
 						} else if (state == State.RECV_RES && socket.isReadable()) {
 							ByteBuffer resBytes = recvResponse();
-							//TODO induct writer
-							System.out.println(new String(reqBytes.array(), "UTF-8"));
-							System.out.println(new String(resBytes.array(), "UTF-8"));
+							createResponseToWrite(reqBytes, resBytes, command.isVerbose());
+//							System.out.println(new String(reqBytes.array(), "UTF-8"));
+//							System.out.println(new String(resBytes.array(), "UTF-8"));
 							return resBytes;
 						}
 					}
 					selector.selectedKeys().clear();
 				} else {
 					break loop;
-//					System.out.println("continue? [y/n]");
-//					String input = System.console().readLine();
-//					if (input.charAt(0) == 'y') {
-//						state = State.SEND_REQ;
-//						continue;
-//					} else {
-//						break;
-//					}
 				}
 			}
 		return null;
 	}
 	
+	/**
+	 * @param reqBytes
+	 * @param resBytes
+	 * @param verbose
+	 */
+	private ByteBuffer createResponseToWrite(ByteBuffer reqBytes,
+			ByteBuffer resBytes, boolean verbose) {
+		ByteBuffer result = ByteBuffer.allocate(reqBytes.capacity() + reqBytes.capacity());
+		if (verbose) {
+			// TODO insert > or <
+		}
+		return result.put(reqBytes).put(resBytes);
+		
+	}
+
 	private ByteBuffer sendRequest(Command command, String path) throws IOException {
 		ByteBuffer buffer = ByteBuffer.allocate(4096);
 		setCommand(buffer, command, path);
@@ -125,12 +133,23 @@ public class MySocket {
 		// -H
 		for (Entry<String, String> header : command.getHeaders().entrySet()) {
 			buffer.put((header.getKey() + ": " + header.getValue() + LS).getBytes());
+		}
+		if (! command.getHeaders().containsKey("Host")) {
 			buffer.put(("Host: localhost" + LS).getBytes());
+		}
+		if (! command.getHeaders().containsKey("Connection")) {
+			buffer.put(("Connection: close" + LS).getBytes());
+		}
+		// -d, -F
+		//TODO URL encode
+		if (command.getRequestBody() != null) {
+			buffer.put(LS.getBytes());
+			for (Entry<String, String> entry : command.getRequestBody().entrySet()) {
+				buffer.put((entry.getKey() + "=" + entry.getValue() + LS).getBytes());
+			}
 		}
 		buffer.put(LS.getBytes());
 		buffer.flip();
 	}
-	
-
 
 }

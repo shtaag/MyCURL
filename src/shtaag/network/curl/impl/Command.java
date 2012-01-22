@@ -21,6 +21,7 @@ public class Command implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private final Map<String, String> headers;
+	private final Map<String, String> requestBody;
 	private final String command;
 	private Queue<UrlFileHandling> urlFilehandling;
 	private final boolean isVerbose;
@@ -38,9 +39,10 @@ public class Command implements Serializable {
 	 * @param isVerbose
 	 * @param isRedirect 
 	 * @param proxy
+	 * @param requestBody 
 	 */
 	public Command(Map<String, String> headers, String command,
-			Queue<UrlFileHandling> urlFilehandling, OutputWriter writer, boolean isVerbose, boolean isRedirect, String proxy) {
+			Queue<UrlFileHandling> urlFilehandling, OutputWriter writer, boolean isVerbose, boolean isRedirect, String proxy, Map<String, String> requestBody) {
 		
 		this.headers = headers;
 		this.command = command;
@@ -49,6 +51,7 @@ public class Command implements Serializable {
 		this.isVerbose = isVerbose;
 		this.isRedirect = isRedirect;
 		this.proxy = proxy;
+		this.requestBody = requestBody;
 	}
 
 	/**
@@ -56,6 +59,9 @@ public class Command implements Serializable {
 	 */
 	public Map<String, String> getHeaders() {
 		return headers;
+	}
+	public Map<String, String> getRequestBody() {
+		return requestBody;
 	}
 
 	/**

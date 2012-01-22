@@ -74,8 +74,7 @@ public class MyCURLMain {
 					resBytes = socket.doHttpClient(command, urlFileHandling.url.path);
 				}
 					
-//				ResponseEntity result = sender.request(command, urlFileHandling);
-//				command.getWriter().write(result.result, result.file);
+				command.getWriter().write(resBytes, urlFileHandling.filename);
 			}
 			
 		} catch (IOException e) {

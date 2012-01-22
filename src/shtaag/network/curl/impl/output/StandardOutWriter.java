@@ -3,10 +3,9 @@
  */
 package shtaag.network.curl.impl.output;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.nio.ByteBuffer;
 
 
 /**
@@ -20,23 +19,9 @@ public class StandardOutWriter implements OutputWriter {
 	 * @see shtaag.network.curl.framework.OutputWriter#write(java.lang.String)
 	 */
 	@Override
-	public void write(String str, File stdout) throws IOException {
+	public void write(ByteBuffer byteBuffer, File stdout) throws IOException {
 		
-		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out));
-		try {
-			writer.write(str);
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw e;
-		} finally {
-			if (writer != null) {
-				try {
-					writer.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+		System.out.println(new String(byteBuffer.array(), "UTF-8"));
 		
 	}
 	

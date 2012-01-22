@@ -5,6 +5,7 @@ package shtaag.network.curl.impl.output;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * @author takei_s
@@ -12,6 +13,6 @@ import java.io.IOException;
  */
 public interface OutputWriter {
 	
-	public void write(String str, File file) throws IOException;
+	public void write(ByteBuffer byteBuffer, File file) throws IOException;
 
 }

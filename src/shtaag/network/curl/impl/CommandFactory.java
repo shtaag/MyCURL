@@ -4,12 +4,18 @@
 package shtaag.network.curl.impl;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Queue;
 
 import shtaag.network.curl.impl.option.Option;
@@ -24,7 +30,7 @@ import shtaag.network.curl.impl.output.StandardOutWriter;
  */
 public class CommandFactory {
 
-	public Command getCommand(List<OptionEntity> optionList, List<URL> urlList) {
+	public Command getCommand(List<OptionEntity> optionList, List<URL> urlList) throws IOException {
 		
 		// -H
 		Map<String, String> headers = getHeaders(optionList);
@@ -40,7 +46,66 @@ public class CommandFactory {
 		boolean isRedirect = isRedirect(optionList);
 		// -x
 		String proxy = proxy(optionList);
-		return new Command(headers, command, urlFilehandling, writer, isVerbose, isRedirect, proxy);
+		// -d, -F
+		Map<String, String> requestBody = getRequestBody(optionList);
+		return new Command(headers, command, urlFilehandling, writer, isVerbose, isRedirect, proxy, requestBody);
+	}
+
+	/**
+	 * @param optionList
+	 * @return
+	 * @throws IOException 
+	 */
+	private Map<String, String> getRequestBody(List<OptionEntity> optionList) throws IOException {
+		Map<String, String> result = new HashMap<String, String>();
+		for (OptionEntity option : optionList) {
+			if (option.getType().equals(Option.FORM)) {
+				String[] keyValuePair = option.getValue().split("=");
+				result.put(keyValuePair[0], keyValuePair[1]);
+			} else if (option.getType().equals(Option.DATA)) {
+				Map<String, String> datas = parseData(option.getValue());
+				// TODO foreach entryでなぜかできない。。。
+				for (Iterator<Entry<String, String>> it = datas.entrySet().iterator(); it.hasNext();) {
+					Entry<String, String> entry = it.next();
+					result.put(entry.getKey(), entry.getValue());
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * @param value
+	 * @return
+	 * @throws IOException 
+	 */
+	private Map<String, String> parseData(String value) throws IOException {
+		Map<String, String> resultMap = new HashMap<String, String>();
+		if (value.indexOf("@") == 0) {
+			// @datafile
+			File file = new File(value.substring(1));
+			InputStream stream = null;
+			Properties props = new Properties();
+			try {
+				stream = new FileInputStream(file);
+				props.load(stream);
+				for (Entry<Object, Object> entry: props.entrySet()) {
+					resultMap.put((String)entry.getKey(), (String)entry.getValue());
+				}
+			} finally {
+				if (stream != null) {
+					try {
+						stream.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		} else {
+			String[] keyValuePair = value.split("=");
+			resultMap.put(keyValuePair[0], keyValuePair[1]);
+		}
+		return resultMap;
 	}
 
 	private boolean isRedirect(List<OptionEntity> optionList) {
@@ -82,10 +147,13 @@ public class CommandFactory {
 		// TODO 複数対応
 		for (OptionEntity option : optionList) {
 			if (option.getType().equals(Option.PROXYHOST)) {
+				if (option.getValue() == null) {
+					throw new IllegalArgumentException("The value for proxy is null.");
+				}
 				return option.getValue();
 			}
 		}
-		throw new IllegalArgumentException("The value for proxy is null.");
+		return null;
 	}
 
 	/**
