@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-import shtaag.network.curl.framework.OutputWriter;
 import shtaag.network.curl.impl.option.Option;
 import shtaag.network.curl.impl.option.OptionEntity;
 import shtaag.network.curl.impl.output.FileOutputWriter;
+import shtaag.network.curl.impl.output.OutputWriter;
 import shtaag.network.curl.impl.output.StandardOutWriter;
 
 /**
@@ -39,15 +39,10 @@ public class CommandFactory {
 		// -L
 		boolean isRedirect = isRedirect(optionList);
 		// -x
-		boolean proxy = proxy(optionList);
-		return new Command(headers, command, urlFilehandling, writer, isVerbose, proxy);
+		String proxy = proxy(optionList);
+		return new Command(headers, command, urlFilehandling, writer, isVerbose, isRedirect, proxy);
 	}
 
-
-	/**
-	 * @param optionList
-	 * @return
-	 */
 	private boolean isRedirect(List<OptionEntity> optionList) {
 		for (OptionEntity option : optionList) {
 			if (option.getType().equals(Option.LOCATION)) {
@@ -57,11 +52,6 @@ public class CommandFactory {
 		return false;
 	}
 
-
-	/**
-	 * @param files
-	 * @return
-	 */
 	private OutputWriter getWriter(List<File> files) {
 		if (files.isEmpty()) {
 			return new StandardOutWriter();
@@ -69,12 +59,6 @@ public class CommandFactory {
 		return new FileOutputWriter();
 	}
 
-
-	/**
-	 * @param urlList
-	 * @param files
-	 * @return
-	 */
 	private Queue<UrlFileHandling> combineUrlFile(List<URL> urlList,
 			List<File> files) {
 		
@@ -94,14 +78,14 @@ public class CommandFactory {
 	 * @param optionList
 	 * @return
 	 */
-	private boolean proxy(List<OptionEntity> optionList) {
+	private String proxy(List<OptionEntity> optionList) {
 		// TODO 複数対応
 		for (OptionEntity option : optionList) {
 			if (option.getType().equals(Option.PROXYHOST)) {
-				return Boolean.valueOf(option.getValue());
+				return option.getValue();
 			}
 		}
-		return false;
+		throw new IllegalArgumentException("The value for proxy is null.");
 	}
 
 	/**

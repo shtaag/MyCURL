@@ -1,7 +1,7 @@
 /**
  * 
  */
-package shtaag.network.curl.impl.request;
+package shtaag.network.curl.impl.socket;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -9,7 +9,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import shtaag.network.curl.impl.Command;
@@ -57,7 +56,7 @@ public class MySocket {
 	
 	private static final String VERVOSE_REQ = "> ";
 	private static final String VERVOSE_RES = "< ";
-	public void doHttpClient(Command command, String path) throws IOException {
+	public ByteBuffer doHttpClient(Command command, String path) throws IOException {
 		state = state.SEND_REQ;
 		ByteBuffer reqBytes = null;
 		loop:
@@ -80,12 +79,12 @@ public class MySocket {
 							//TODO induct writer
 							System.out.println(new String(reqBytes.array(), "UTF-8"));
 							System.out.println(new String(resBytes.array(), "UTF-8"));
-							return;
+							return resBytes;
 						}
 					}
 					selector.selectedKeys().clear();
 				} else {
-					break;
+					break loop;
 //					System.out.println("continue? [y/n]");
 //					String input = System.console().readLine();
 //					if (input.charAt(0) == 'y') {
@@ -96,6 +95,7 @@ public class MySocket {
 //					}
 				}
 			}
+		return null;
 	}
 	
 	private ByteBuffer sendRequest(Command command, String path) throws IOException {
@@ -127,13 +127,10 @@ public class MySocket {
 			buffer.put((header.getKey() + ": " + header.getValue() + LS).getBytes());
 			buffer.put(("Host: localhost" + LS).getBytes());
 		}
-		// -p
-		if (command.isProxy()) {
-			
-		}
 		buffer.put(LS.getBytes());
 		buffer.flip();
 	}
+	
 
 
 }

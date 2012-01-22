@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
-import shtaag.network.curl.framework.OutputWriter;
 
 /**
  * @author takei_s

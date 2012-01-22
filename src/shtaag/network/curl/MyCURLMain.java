@@ -4,6 +4,7 @@
 package shtaag.network.curl;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Queue;
 
@@ -14,7 +15,7 @@ import shtaag.network.curl.impl.UrlFileHandling;
 import shtaag.network.curl.impl.UrlParser;
 import shtaag.network.curl.impl.option.OptionEntity;
 import shtaag.network.curl.impl.option.OptionParser;
-import shtaag.network.curl.impl.request.MySocket;
+import shtaag.network.curl.impl.socket.MySocket;
 
 /**
  * @author takei_s
@@ -53,12 +54,26 @@ public class MyCURLMain {
 			Command command = new CommandFactory().getCommand(optionList, urlList);
 			
 			Queue<UrlFileHandling> urlQueue = command.getUrlFilehandling();
-			// TODO 本当はurlとsender(protocol)をひとまとめにしなければならなかった。
-//			RequestSender sender = new HttpRequestSender();
+			// TODO 本当はurlとsocket(protocol)をひとまとめにしなければならなかった。
 			while (! urlQueue.isEmpty()) {
 				UrlFileHandling urlFileHandling = urlQueue.poll();
-				MySocket socket = new MySocket(urlFileHandling.url.host, 80);
-				socket.doHttpClient(command, urlFileHandling.url.path);
+				
+				ByteBuffer resBytes = null;
+				URL url = (command.getProxy() != null) ? getProxiedUrl(command.getProxy()) : urlFileHandling.url;
+				if (command.isRedirect()) {
+					do {
+						if (isRedirect(resBytes)) {
+							url = getRedirectUrl(resBytes);
+						}
+						MySocket socket = new MySocket(url.host, url.port);
+						resBytes = socket.doHttpClient(command, urlFileHandling.url.path);
+					} while (isRedirect(resBytes));
+					
+				} else {
+					MySocket socket = new MySocket(url.host, url.port);
+					resBytes = socket.doHttpClient(command, urlFileHandling.url.path);
+				}
+					
 //				ResponseEntity result = sender.request(command, urlFileHandling);
 //				command.getWriter().write(result.result, result.file);
 			}
@@ -68,6 +83,33 @@ public class MyCURLMain {
 			throw new RuntimeException(e);
 		}
 		
+	}
+	
+	/**
+	 * @param resBytes
+	 * @return
+	 */
+	private URL getRedirectUrl(ByteBuffer resBytes) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * @param resBytes
+	 * @return
+	 */
+	private boolean isRedirect(ByteBuffer resBytes) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	private URL getProxiedUrl(String proxy) {
+		String[] values = proxy.split(":");
+		if (values.length > 2 || values.length == 0) {
+			throw new IllegalArgumentException("proxy value is invalid.");
+		}
+		int port = (values.length == 1) ? 1080 : Integer.parseInt(values[1]);
+		return UrlParser.constructUrl(values[0], port);
 	}
 
 }

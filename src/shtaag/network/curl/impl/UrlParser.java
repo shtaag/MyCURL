@@ -7,8 +7,6 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import shtaag.network.curl.impl.option.KeyOnlyOptionEntity;
-import shtaag.network.curl.impl.option.KeyValueOptionEntity;
 import shtaag.network.curl.impl.option.Option;
 
 /**
@@ -19,6 +17,7 @@ import shtaag.network.curl.impl.option.Option;
  */
 public class UrlParser {
 	
+	public static final int DEFAULT_PORT = 80;
 	public static List<URL> parse(String[] str) {
 		List<URL> result = new ArrayList<URL>();
 		for (int i = 0; i < str.length; i++) {
@@ -27,15 +26,15 @@ public class UrlParser {
 				if (i > 0) {
 					Option option = Option.check(str[i - 1]);
 					if (option == null) {
-						result.add(constructUrl(str[i]));
+						result.add(constructUrl(str[i], DEFAULT_PORT));
 					}
 					switch (option) {
-					case LOCATION: result.add(constructUrl(str[i])); break;
-					case VERBOSE: result.add(constructUrl(str[i])); break;
+					case LOCATION: result.add(constructUrl(str[i], DEFAULT_PORT)); break;
+					case VERBOSE: result.add(constructUrl(str[i], DEFAULT_PORT)); break;
 					default: break;
 					}
 				} else {
-					result.add(constructUrl(str[i]));
+					result.add(constructUrl(str[i], DEFAULT_PORT));
 				}
 			}
 		}
@@ -51,12 +50,12 @@ public class UrlParser {
 	 * @return
 	 * @throws MalformedURLException 
 	 */
-	private static URL constructUrl(String str) {
+	public static URL constructUrl(String str, int port) {
 		if (! str.startsWith(HTTP_HEAD)) {
-				return new URL(getHost(str), str.substring(getHost(str).length()));
+				return new URL(getHost(str), port, str.substring(getHost(str).length()));
 		}
 		String withoutProtcol = str.replace(HTTP_HEAD, "");
-		return new URL(getHost(withoutProtcol), withoutProtcol.substring(getHost(withoutProtcol).length()));
+		return new URL(getHost(withoutProtcol), port, withoutProtcol.substring(getHost(withoutProtcol).length()));
 	}
 	
 	private static String getHost(String str) {

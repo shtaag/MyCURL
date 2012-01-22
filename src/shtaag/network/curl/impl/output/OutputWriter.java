@@ -1,7 +1,7 @@
 /**
  * 
  */
-package shtaag.network.curl.framework;
+package shtaag.network.curl.impl.output;
 
 import java.io.File;
 import java.io.IOException;

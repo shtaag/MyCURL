@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Queue;
 
-import shtaag.network.curl.framework.OutputWriter;
+import shtaag.network.curl.impl.output.OutputWriter;
 
 /**
  * @author takei_s
@@ -24,7 +24,8 @@ public class Command implements Serializable {
 	private final String command;
 	private Queue<UrlFileHandling> urlFilehandling;
 	private final boolean isVerbose;
-	private final boolean proxy;
+	private final boolean isRedirect;
+	private final String proxy;
 
 	private final OutputWriter writer;
 
@@ -35,16 +36,18 @@ public class Command implements Serializable {
 	 * @param urlFilehandling
 	 * @param writer 
 	 * @param isVerbose
+	 * @param isRedirect 
 	 * @param proxy
 	 */
 	public Command(Map<String, String> headers, String command,
-			Queue<UrlFileHandling> urlFilehandling, OutputWriter writer, boolean isVerbose, boolean proxy) {
+			Queue<UrlFileHandling> urlFilehandling, OutputWriter writer, boolean isVerbose, boolean isRedirect, String proxy) {
 		
 		this.headers = headers;
 		this.command = command;
 		this.urlFilehandling = urlFilehandling;
 		this.writer = writer;
 		this.isVerbose = isVerbose;
+		this.isRedirect = isRedirect;
 		this.proxy = proxy;
 	}
 
@@ -87,11 +90,14 @@ public class Command implements Serializable {
 	public boolean isVerbose() {
 		return isVerbose;
 	}
+	public boolean isRedirect() {
+		return isRedirect;
+	}
 
 	/**
 	 * @return the proxy
 	 */
-	public boolean isProxy() {
+	public String getProxy() {
 		return proxy;
 	}
 
