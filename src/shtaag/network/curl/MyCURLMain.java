@@ -11,9 +11,9 @@ import shtaag.network.curl.impl.Command;
 import shtaag.network.curl.impl.CommandFactory;
 import shtaag.network.curl.impl.URL;
 import shtaag.network.curl.impl.UrlFileHandling;
+import shtaag.network.curl.impl.UrlParser;
 import shtaag.network.curl.impl.option.OptionEntity;
-import shtaag.network.curl.impl.parser.OptionParser;
-import shtaag.network.curl.impl.parser.UrlParser;
+import shtaag.network.curl.impl.option.OptionParser;
 import shtaag.network.curl.impl.request.MySocket;
 
 /**

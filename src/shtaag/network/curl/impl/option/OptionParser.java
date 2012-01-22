@@ -1,15 +1,11 @@
 /**
  * 
  */
-package shtaag.network.curl.impl.parser;
+package shtaag.network.curl.impl.option;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import shtaag.network.curl.impl.option.KeyOnlyOptionEntity;
-import shtaag.network.curl.impl.option.KeyValueOptionEntity;
-import shtaag.network.curl.impl.option.Option;
-import shtaag.network.curl.impl.option.OptionEntity;
 
 /**
  * @author takei_s

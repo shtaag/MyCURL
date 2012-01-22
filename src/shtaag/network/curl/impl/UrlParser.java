@@ -1,13 +1,12 @@
 /**
  * 
  */
-package shtaag.network.curl.impl.parser;
+package shtaag.network.curl.impl;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import shtaag.network.curl.impl.URL;
 import shtaag.network.curl.impl.option.KeyOnlyOptionEntity;
 import shtaag.network.curl.impl.option.KeyValueOptionEntity;
 import shtaag.network.curl.impl.option.Option;

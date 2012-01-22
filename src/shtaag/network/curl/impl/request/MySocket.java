@@ -6,10 +6,11 @@ package shtaag.network.curl.impl.request;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import shtaag.network.curl.impl.Command;
 
@@ -54,8 +55,11 @@ public class MySocket {
 		}
 	}
 	
+	private static final String VERVOSE_REQ = "> ";
+	private static final String VERVOSE_RES = "< ";
 	public void doHttpClient(Command command, String path) throws IOException {
 		state = state.SEND_REQ;
+		ByteBuffer reqBytes = null;
 		loop:
 			while(true) {
 				switch(state) {
@@ -69,12 +73,13 @@ public class MySocket {
 				if (selector.select(POLL_TIMEOUT) > 0) {
 					for (SelectionKey socket : selector.selectedKeys()) {
 						if (state == State.SEND_REQ && socket.isWritable()) {
-							sendRequest(command, path);
+							reqBytes = sendRequest(command, path);
 							state = State.RECV_RES;
 						} else if (state == State.RECV_RES && socket.isReadable()) {
-							ByteBuffer byteBuffer = recvResponse();
+							ByteBuffer resBytes = recvResponse();
 							//TODO induct writer
-							System.out.println(new String(byteBuffer.array(), "UTF-8"));
+							System.out.println(new String(reqBytes.array(), "UTF-8"));
+							System.out.println(new String(resBytes.array(), "UTF-8"));
 							return;
 						}
 					}
@@ -93,10 +98,11 @@ public class MySocket {
 			}
 	}
 	
-	private void sendRequest(Command command, String path) throws IOException {
+	private ByteBuffer sendRequest(Command command, String path) throws IOException {
 		ByteBuffer buffer = ByteBuffer.allocate(4096);
 		setCommand(buffer, command, path);
 		channel.write(buffer);
+		return buffer;
 	}
 
 	private ByteBuffer recvResponse() throws IOException{
@@ -114,9 +120,17 @@ public class MySocket {
 	 * @param path 
 	 */
 	private void setCommand(ByteBuffer buffer, Command command, String path) {
-		
+		// -X
 		buffer.put((command.getCommand() + " " + path + " " + protocol + LS).getBytes());
-		buffer.put(("Host: localhost" + LS).getBytes());
+		// -H
+		for (Entry<String, String> header : command.getHeaders().entrySet()) {
+			buffer.put((header.getKey() + ": " + header.getValue() + LS).getBytes());
+			buffer.put(("Host: localhost" + LS).getBytes());
+		}
+		// -p
+		if (command.isProxy()) {
+			
+		}
 		buffer.put(LS.getBytes());
 		buffer.flip();
 	}
